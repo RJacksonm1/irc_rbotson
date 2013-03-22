@@ -1,14 +1,23 @@
 var config = {};
 
-config.rc_configs = [
+config.plugins = [
     {
-        enabled: true,
-        irc_channel: "#somechannel",
-        rc_interval: 30000,
-        rc_api_url: "http://www.the_best_wiki.com/w/api.php?",
-        rc_base_url: "http://www.the_best_wiki.com/w/",
-        rc_last: 0,
-        rc_params: {
+        name: "irc_log",
+        dependencies: ["fs"],
+        channels: ["#somechannel"]
+    },
+    {
+        name: "recent_changes",
+        dependencies: ["http", "querystring"],
+        wikis: [
+            {
+                enabled: false,
+                irc_channel: "#somechannel",
+                interval: 30000,
+                api_url: "http://www.the_best_wiki.com/w/api.php?",
+                base_url: "http://www.the_best_wiki.com/w/",
+                last_rcid: 0,
+                params: {
             "action": "query",
             "list": "recentchanges",
             "format": "json",
@@ -17,7 +26,9 @@ config.rc_configs = [
             "rclimit": 100,
             "rcdir": "newer",
             "rcstart": parseInt(new Date().getTime()/1000, 10)
-        }
+                }
+            }
+        ]
     }
 ];
 
@@ -25,10 +36,8 @@ config.google_api_key = "";
 config.irc_server = "irc.freenode.com";
 config.irc_nickname = "RBotson";
 config.irc_nickserv_pw = null;
-var irc_channels = [];  // rc_config channels are added automatically.
-
-// Generate list of irc channels from rc_config.
-for (var i = 0; i < config.rc_configs.length; i++) if (config.rc_configs[i].enabled) (irc_channels.push(config.rc_configs[i].irc_channel));
+var irc_channels = ["#somechannel"];  // rc_config channels are added automatically.
+config.irc_relayed_channels = config.irc_channels;  // Depricate this you fack RJ
 
 config.irc_options = {
     userName: 'RBotson',

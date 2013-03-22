@@ -1,0 +1,50 @@
+extends layout
+
+block content
+    h1= title
+    div.tabbable.tabs#relayedChannels
+        ul.nav.nav-tabs
+            each channel, i in channels
+                - var active=""; if (i === 0) active="active";
+                li(class=active)
+                    a(href=channel, data-toggle="tab") #{channel}
+
+        div.tab-content
+            - each channel, i in channels
+                - var active=""; if (i === 0) active="active";
+                div.tab-pane.irc(id=channel.replace("#", ""), class=active)
+                    div#messages
+            div#inputarea
+                input
+
+
+    script(type="text/javascript", src="http://localhost:3000/socket.io/socket.io.js")
+    script
+        var socket = io.connect('http://localhost:3000');
+        socket.on('irc_msg', function(data) {
+            $(data.to + " #messages").append($(
+                "<div class=\"message_row\">"
+                + "<span id=\"user\">" + data.from + "</span>"
+                + "<span id=\"message\">" + data.message + "</span>"
+                + "</div>"
+                ));
+        });
+    style
+        .irc {
+            font-family:monospace;
+        }
+        #message_row #user{
+            width: 6em;
+            text-align: right;
+        }
+        #message_row {
+            display:block;
+        }
+        #messages {
+            height:30em;
+            overflow:auto;
+        }
+        #inputarea {
+            height:2em;
+            background: #ff0;
+        }
