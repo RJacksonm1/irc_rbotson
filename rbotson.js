@@ -1,7 +1,5 @@
 var irc = require("irc");
 var fs = require("fs");
-var io = require("socket.io");
-var async = require("async");
 
 // Load config
 var config = require("./config");
@@ -29,18 +27,6 @@ client.on("registered", function(message){
     }
 });
 
-var socket = io.listen(2999);
-socket.on("connection", function(client){
-    client.send("Yoloswag");
-});
-
-client.on("names", function(channel, nicks) {
-    socket.sockets.emit("names", {
-        channel: channel,
-        nicks: nicks
-    });
-});
-
 
 // Handle IRC server errors
 client.addListener('error', function(message) {
@@ -49,7 +35,6 @@ client.addListener('error', function(message) {
 
 client.on("message", function(from, to, message){
     if (config.irc_relayed_channels.indexOf(to) >= 0) {
-        socket.sockets.emit("message", {from: from, to: to, message: message});
         console.log("Sending [from, to, message]");
     }
 });

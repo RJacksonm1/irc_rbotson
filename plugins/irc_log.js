@@ -1,24 +1,24 @@
-var irc_client = null;
+var config;
+var nano;
+var db;
 
-function initialise(irc_client, config, fs, cb) {
-    irc_client = irc_client;
+exports.initialise = function (irc_client, _config, _nano, cb) {
+    config = _config;
+    nano = _nano(config.db_server);
+    db = nano.use(config.db_name);
 
-    // irc_client.on("topic", function(channel, topic, nick, message){});
-    // irc_client.on("join", function(channel, nick, message){});
-    // irc_client.on("part", function(channel, nick, reason, message){});
-    // irc_client.on("quit", function(nick, reason, channels, message){});
-    // irc_client.on("kick", function(channel, nick, by, reason, message){});
-    // irc_client.on("message", function(nick, to, text, message){});
-    // irc_client.on("nick", function(oldnick, newnick, channels, message){});
-    // irc_client.on("+mode", function(channel, by, mode, argument, message){});
-    // irc_client.on("-mode", function(channel, by, mode, argument, message){});
     irc_client.on("raw", function(message){
-        fs.appendFile("./raw_log.txt", JSON.stringify(message) + "\n", function(err){
-            if (err) console.error(err);
-        });
+        message.timestamp = parseInt(new Date().getTime()/1000, 10);
+        insert_raw(message);
     });
     console.log("Loaded irc log");
     if (cb) cb();
-}
+};
 
-exports.initialise = initialise;
+function insert_raw(message) {
+    db.insert(message, function(error, http_body, http_headers) {
+        if(error) {
+            console.error(error);
+        }
+    });
+}

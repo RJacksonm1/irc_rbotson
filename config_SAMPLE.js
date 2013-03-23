@@ -4,7 +4,9 @@ config.plugins = [
     {
         name: "irc_log",
         dependencies: ["fs"],
-        channels: ["#somechannel"]
+        channels: ["#somechannel"],
+        db_name: "rbotson_irc_log",
+        db_server: "http://localhost:5984"
     },
     {
         name: "recent_changes",

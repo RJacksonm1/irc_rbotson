@@ -7,10 +7,15 @@ Number.prototype.padLeft = function(base,chr){
 };
 shortenUrl = require("../helpers").shortenUrl;
 
-var irc_client = null;
+var irc_client;
+var http;
+var querystring;
 
-function initialise(irc_client, config, http, querystring, cb) {
-    irc_client = irc_client;
+function initialise(_irc_client, config, _http, _querystring, cb) {
+    irc_client = _irc_client;
+    http = _http;
+    querystring = _querystring;
+
     for (var i = 0; i < config.length; i++) {
         checkRecentChanges(config[i]);
         setInterval(checkRecentChangesCB(config[i]), config[i].interval);
