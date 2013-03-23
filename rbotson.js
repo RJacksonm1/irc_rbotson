@@ -17,13 +17,13 @@ client.on("registered", function(message){
     if (config.irc_nickserv_pw) client.say("nickserv", "identify " + config.irc_nickserv_pw);
 
     // Initialise irc bot plugins
-    for (var i = 0; i < config.plugins.length; i++) {
-        var args = [client, config.plugins[i]];
-        for (var j = 0; j < config.plugins[i].dependencies.length; j++) {
-            args.push(require(config.plugins[i].dependencies[j]));
+    for (var k in config.plugins) {
+        var args = [client, config.plugins[k]];
+        for (var i = 0; i < config.plugins[k].dependencies.length; i++) {
+            args.push(require(config.plugins[k].dependencies[i]));
         }
         //console.log(args);
-        require("./plugins/" + config.plugins[i].name).initialise.apply(null, args);
+        require("./plugins/" + config.plugins[k].name).initialise.apply(null, args);
     }
 });
 

@@ -1,14 +1,14 @@
 var config = {};
 
-config.plugins = [
-    {
+config.plugins = {
+    irc_log: {
         name: "irc_log",
         dependencies: ["fs"],
         channels: ["#somechannel"],
         db_name: "rbotson_irc_log",
         db_server: "http://localhost:5984"
     },
-    {
+    recent_changes: {
         name: "recent_changes",
         dependencies: ["http", "querystring"],
         wikis: [
@@ -32,14 +32,13 @@ config.plugins = [
             }
         ]
     }
-];
+};
 
 config.google_api_key = "";
 config.irc_server = "irc.freenode.com";
 config.irc_nickname = "RBotson";
 config.irc_nickserv_pw = null;
-var irc_channels = ["#somechannel"];  // rc_config channels are added automatically.
-config.irc_relayed_channels = config.irc_channels;  // Depricate this you fack RJ
+var irc_channels = ["#somechannel"];
 
 config.irc_options = {
     userName: 'RBotson',

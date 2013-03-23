@@ -2,8 +2,6 @@ var googleapis = require("googleapis");
 var http = require("http");
 var irc = require("irc");
 var querystring = require("querystring");
-var io = require("socket.io");
-var ioclient = require("socket.io-client");
 var express = require('express'),
     routes = require('./routes'),
     http = require('http'),
@@ -38,18 +36,4 @@ app.get('/home', routes.home);
 
 var httpServer = http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
-});
-
-var socket = io.listen(httpServer);
-socket.on('connection', function(client){
-    console.log("Client connected");
-});
-
-var irc = ioclient.connect('http://localhost:2999');
-irc.on("connect", function(){
-    console.log("Connected to IRC");
-    irc.on("message", function(data){
-        console.log(data);
-        socket.sockets.emit("irc_msg", data);
-    });
 });

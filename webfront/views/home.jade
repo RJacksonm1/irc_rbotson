@@ -14,21 +14,11 @@ block content
                 - var active=""; if (i === 0) active="active";
                 div.tab-pane.irc(id=channel.replace("#", ""), class=active)
                     div#messages
+                        -each item in data
+                            p #{JSON.stringify(item)}
             div#inputarea
                 input
 
-
-    script(type="text/javascript", src="http://localhost:3000/socket.io/socket.io.js")
-    script
-        var socket = io.connect('http://localhost:3000');
-        socket.on('irc_msg', function(data) {
-            $(data.to + " #messages").append($(
-                "<div class=\"message_row\">"
-                + "<span id=\"user\">" + data.from + "</span>"
-                + "<span id=\"message\">" + data.message + "</span>"
-                + "</div>"
-                ));
-        });
     style
         .irc {
             font-family:monospace;
