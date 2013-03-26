@@ -16,34 +16,34 @@ function initialise(_irc_client, config, _http, _querystring, cb) {
     http = _http;
     querystring = _querystring;
 
-    for (var i = 0; i < config.length; i++) {
-        checkRecentChanges(config[i]);
-        setInterval(checkRecentChangesCB(config[i]), config[i].interval);
+    for (var i = 0; i < config.wikis.length; i++) {
+        checkRecentChanges(config.wikis[i]);
+        setInterval(checkRecentChangesCB(config.wikis[i]), config.wikis[i].interval);
     }
-    console.log("Loaded RC");
+    console.log("Loaded " + config.name);
     if (cb) cb();
 }
 
-function checkRecentChangesCB(config) {
+function checkRecentChangesCB(wiki_config) {
   return function(){
-    checkRecentChanges(config);
+    checkRecentChanges(wiki_config);
   };
 }
 
-function checkRecentChanges(config) {
-    getRCFromMediaWiki(config.api_url, config.params, function(rcs){
+function checkRecentChanges(wiki_config) {
+    getRCFromMediaWiki(wiki_config.api_url, wiki_config.params, function(rcs){
         if (rcs.length) {
             for (var i = 0; i < rcs.length; i++) {
-                if (rcs[i].rcid <= config.last_rcid) {
+                if (rcs[i].rcid <= wiki_config.last_rcid) {
                     continue;
                 }
                 else {
-                    config.last_rcid = rcs[i].rcid;
+                    wiki_config.last_rcid = rcs[i].rcid;
                 }
-                rcs[i].base_url = config.base_url;
-                rcToIRC(rcs[i], config.irc_channel);
+                rcs[i].base_url = wiki_config.base_url;
+                rcToIRC(rcs[i], wiki_config.irc_channel);
             }
-            config.params.rcstart = parseInt(new Date().getTime()/1000, 10);
+            wiki_config.params.rcstart = parseInt(new Date().getTime()/1000, 10);
         }
     });
 }
@@ -91,26 +91,26 @@ function rcToIRC(rc, channel) {
         if ("bot" in rc) flags +="b";
         if (!flags.length) flags = "-";
 
-        statement = "[\x1fRC\x1f]";
-        statement += " \x02\x0304" + flags + "\x03\x02";
-        if (rc.type == "log") statement += " \x0304" + rc.logaction.capitalize() + "\x03";
-        statement += " \x02\x0310" + rc.title + "\x03";
-        statement += " \x02by \x02\x0306" + rc.user + "\x03\x02";
-        statement += " - " + url;
-
         sizeDiff = (rc.newlen - rc.oldlen);
         if (sizeDiff < 0) sizeDiffFm = "\x0304" + sizeDiff + "\x03";
         else if (sizeDiff === 0) sizeDiffFm = "\x0314" + sizeDiff + "\x03";
         else if (sizeDiff > 0) sizeDiffFm = "\x0303+" + sizeDiff + "\x03";
         if (Math.abs(sizeDiff) >= 512) sizeDiffFm = "\x02" + sizeDiffFm + "\x02";
-        statement += " (" + sizeDiffFm +")";
-
-        if (rc.comment) statement += " (\x0314" + rc.comment.replace(/(?:\[|\]|\{|\})/g,"") +"\x03)"; // Escape []{} bcuz Spacenet.
 
         var date = new Date(rc.timestamp),
             dateFm = [ date.getUTCHours().padLeft(), date.getUTCMinutes().padLeft(), date.getUTCSeconds().padLeft()].join(":");
-        statement += " (\x0304" + dateFm + "\x03)";
 
+        statement = require("util").format(
+            "[\x1fRC\x1f] \x02\x0304%s\x03\x02%s \x02\x0310%s\x03 \x02by \x02\x0306%s\x03\x02 - %s (%s)%s (\x0305%s\x03)",
+            flags,
+            (rc.type == "log") ? " \x0304" + rc.logaction.capitalize() + "\x03" : "",
+            rc.title,
+            rc.user,
+            url,
+            sizeDiffFm,
+            (rc.comment) ? " (\x0314" + rc.comment.replace(/(?:\[|\]|\{|\})/g,"") +"\x03)" : "",
+            dateFm
+            );
         irc_client.say(channel, statement);
     });
 }

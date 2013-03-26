@@ -32,9 +32,3 @@ client.on("registered", function(message){
 client.addListener('error', function(message) {
     console.log('error: ', message);
 });
-
-client.on("message", function(from, to, message){
-    if (config.irc_relayed_channels.indexOf(to) >= 0) {
-        console.log("Sending [from, to, message]");
-    }
-});

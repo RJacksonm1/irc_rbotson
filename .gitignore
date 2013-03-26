@@ -1,3 +1,5 @@
 config.js
 raw_log.txt
 node_modules/
+sentry
+servers

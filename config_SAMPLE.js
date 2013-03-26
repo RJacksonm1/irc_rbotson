@@ -1,6 +1,14 @@
 var config = {};
 
 config.plugins = {
+    steam_relay: {
+        name: "steam_relay",
+        dependencies: ["steam", "fs"],
+        relays: [{channel: "#somechannel", groupid: "103582791429521412"}],
+        steam_name: "IRC Relay",
+        steam_user: "user",
+        steam_pass: "password"
+    },
     irc_log: {
         name: "irc_log",
         dependencies: ["fs"],

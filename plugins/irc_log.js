@@ -9,14 +9,20 @@ exports.initialise = function (irc_client, _config, _nano, cb) {
 
     irc_client.on("raw", function(message){
         message.timestamp = parseInt(new Date().getTime()/1000, 10);
-        insert_raw(message);
+        switch (message.command) {
+            // TODO: Figure out how do quit, kill, notice, nick.
+            default:
+                // This will catch: MODE, TOPIC, JOIN, PART, KICK
+                if (config.channels.indexOf(message.args[0]) > -1) insert(message);
+                break;
+        }
     });
-    console.log("Loaded irc log");
+    console.log("Loaded " + config.name);
     if (cb) cb();
 };
 
-function insert_raw(message) {
-    db.insert(message, function(error, http_body, http_headers) {
+function insert(data) {
+    db.insert(data, function(error, http_body, http_headers) {
         if(error) {
             console.error(error);
         }
