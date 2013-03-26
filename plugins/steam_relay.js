@@ -116,16 +116,17 @@ exports.initialise = function (_irc_client, _config, _steam, _fs, cb) {
         }
     });
 
-    irc_client.on('kick#', function(channel, nick, by, reason, message) {
-        if (channel in channelsToGroupids) steamSay(channelsToGroupids[channel], by + ' has kicked ' + nick + ' from ' + details.channel + ' (' + reason + ')');
+    irc_client.on('kick', function(channel, nick, by, reason, message) {
+        if (channel in channelsToGroupids) steamSay(channelsToGroupids[channel], by + ' has kicked ' + nick + ' from ' + channel + ' (' + reason + ')');
     });
 
-    irc_client.on('join#', function(channel, nick) {
-        if (channel in channelsToGroupids) steamSay(channelsToGroupids[channel], nick + ' has joined ' + details.channel);
+    irc_client.on('join', function(channel, nick) {
+        console.log(channel, nick);
+        if (channel in channelsToGroupids) steamSay(channelsToGroupids[channel], nick + ' has joined ' + channel);
     });
 
-    irc_client.on('part#', function(channel, nick) {
-        if (channel in channelsToGroupids) steamSay(channelsToGroupids[channel], nick + ' has left ' + details.channel);
+    irc_client.on('part', function(channel, nick) {
+        if (channel in channelsToGroupids) steamSay(channelsToGroupids[channel], nick + ' has left ' + channel);
     });
 
     irc_client.on('quit', function(nick, reason, channels) {
