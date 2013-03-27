@@ -94,6 +94,15 @@ exports.initialise = function (_irc_client, _config, _steam, _fs, cb) {
     irc_client.on("message#", function(nick, to, text, message){
         if (to in channelsToGroupids) {
             steamSay(channelsToGroupids[to], "<" + nick + "> " + text, Steam.EChatEntryType.ChatMsg);
+
+            var command = (new RegExp(irc_client.opt.nick + ":?\\s*(.*)", "i")).exec(text);
+            if (command) {
+                switch (command[1]) {
+                    case "group":
+                        irc_client.say(to, "steam://friends/joinchat/" + channelsToGroupids[to]);
+                        break;
+                }
+            }
         }
     });
 
