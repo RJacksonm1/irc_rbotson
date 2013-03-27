@@ -100,19 +100,12 @@ exports.initialise = function (irc_client, _config, _nano, cb) {
 
     irc_client.on("KILL", function(nick, reason, channels, message){
         for (var i = 0; i < channels.length; i++) {
-            if (config.channels.indexOf(channels[i] > -1)) insert({
-                timestamp: parseInt(new Date().getTime()/1000, 10),
-                channel: channels[i],
-                command: message.command,
-                actor:{name: message.nick, user:message.user, host: message.host},
-                args:[reason]
-            });
         }
     });
 
     // Capture messages we send to the server.
     irc_client.on("selfMessage", function(target, message){
-        irc_client.whois(self.nick, function(info){
+        irc_client.whois(irc_client.nick, function(info){
             if (config.channels.indexOf(target > -1)) insert({
                 timestamp: parseInt(new Date().getTime()/1000, 10),
                 channel: target,
