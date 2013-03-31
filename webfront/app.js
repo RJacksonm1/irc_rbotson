@@ -7,6 +7,12 @@ var express = require('express'),
     http = require('http'),
     path = require('path');
 
+var config = require("../config").plugins.irc_log;
+var io = require('socket.io');
+var io_client = require('socket.io-client');
+
+var dataParse = require('./irc_tools.js').dataParse;
+
 var app = express();
 
 app.configure(function(){
@@ -36,4 +42,17 @@ app.get('/home', routes.home);
 
 var httpServer = http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
+});
+
+
+var socket = io.listen(httpServer);
+
+var irc = io_client.connect("http://localhost:" + config.live_socket_port);
+irc.on('connect', function(data){
+  console.log("Connected to rbotson");
+  // io.sockets.emit("irc_message", dataParse(data));
+  irc.on('irc_message', function(data){
+    console.log("RECEIVED AN MESSIDGE");
+    socket.sockets.emit("irc_message", dataParse(data));
+  });
 });

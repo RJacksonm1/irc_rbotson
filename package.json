@@ -9,8 +9,13 @@
     "nano": "*",
     "querystring": "*",
     "irc": "*",
-    "express": "*",
+    "express": "3.*",
     "googleapis": "*",
-    "steam": "*"
+    "steam": "*",
+    "jade": "*",
+    "node-tokenizer": "*",
+    "socket.io": "*",
+    "socket.io-client": "*",
+    "validator": "*"
   }
 }

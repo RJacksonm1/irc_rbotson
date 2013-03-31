@@ -1,40 +1,112 @@
-extends layout
+doctype 5
+html
+    head
+        title= title
+        meta(name='viewport', content='width=device-width, initial-scale=1.0')
+        link(rel='stylesheet', href='/css/bootstrap-responsive.min.css')
+        link(rel='stylesheet', href='/css/bootstrap.min.css')
+        style(type='text/css')
+            html,body { height: 100%; }
+            #tabs {
+                position: absolute;
+                top: 0px;
+                left: 8px;
+                right: 8px;
+                bottom: 38px;
+            }
+            #footer {
+                background-color: #f5f5f5;
+                position:absolute;
+                bottom:0px;
+                left:0px;
+                right:0px;
+                height: 38px;
+            }
+            #footer > div { margin: 4px 0; }
 
-block content
-    h1= title
-    div.tabbable.tabs#relayedChannels
-        ul.nav.nav-tabs
-            each channel, i in channels
-                - var active=""; if (i === 0) active="active";
-                li(class=active)
-                    a(href=channel, data-toggle="tab") #{channel}
+            .irc {
+                font-family:monospace;
+                padding-bottom: 1em;
+            }
+            #message_row {
+                display:block;
+            }
+            //- #message_row #time:before { content: "[" }
+            //- #message_row #time:after { content: "]"}
+            #message_row #user {
+                display: inline-block;
+                width: 6em;
+                text-align: right;
+                padding-right: .5em;
+                border-right: 1px solid #959595;
+                margin-right: .5em;
+            }
+            #messages {
+                overflow:auto;
+                position: absolute;
+                top: 118px;
+                left: 8px;
+                right: 8px;
+                bottom:0px;
+            }
+            #inputarea {
+                display:table;
+                width:100%;
+            }
+            #inputarea > input {
+                display:table-cell;
+                width:100%;
+            }
+            #inputarea .add-on {
+                display:table-cell;
+                width: 4em;
+                padding-left: 1em;
+            }
+    body
+    div.container-fluid
+        div.tabbable.tabs#tabs
+            h1= title
+            ul.nav.nav-tabs
+                each channel, i in channels
+                    - var active=""; if (i === 0) active="active";
+                    li(class=active)
+                        a(href=channel, data-toggle="tab") #{channel}
 
-        div.tab-content
-            - each channel, i in channels
-                - var active=""; if (i === 0) active="active";
-                div.tab-pane.irc(id=channel.replace("#", ""), class=active)
-                    div#messages
-                        -each item in data
-                            p #{JSON.stringify(item)}
-            div#inputarea
-                input
+            div.tab-content#content
+                - each channel, i in channels
+                    - var active=""; if (i === 0) active="active";
+                    div.tab-pane.irc(id=channel.replace("#", ""), class=active)
+                        div#messages
+                            -each item in data[channel]
+                                div#message_row
+                                    span#time [#{item.time}]
+                                    span#user !{item.user}
+                                    span#message !{item.message}
 
-    style
-        .irc {
-            font-family:monospace;
-        }
-        #message_row #user{
-            width: 6em;
-            text-align: right;
-        }
-        #message_row {
-            display:block;
-        }
-        #messages {
-            height:30em;
-            overflow:auto;
-        }
-        #inputarea {
-            height:2em;
-            background: #ff0;
-        }
+        div.container-fluid#footer
+            div.input-append.input-block-level#inputarea
+                input(type="text")
+                span.add-on.btn Send
+
+    script(type='text/javascript', src='http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js')
+    script(type='text/javascript', src='/js/bootstrap.js')
+    script(type='text/javascript', src="/socket.io/socket.io.js")
+    script
+        $(document).ready(function(){
+            var socket = io.connect('http://localhost');
+            socket.on("irc_message", function (data) {
+                //- console.log(data);
+                var messagerow = $("<div/>", {id: "messagerow"});
+                var time = $("<span/>", {html: "[" + data.time + "]", id: "time"})
+                var user = $("<span/>", {html: data.user, id: "user"})
+                    .css("display", "inline-block")
+                    .css("width", "6em")
+                    .css("text-align", "right")
+                    .css("padding-right", ".5em")
+                    .css("border-right", "1px solid #959595")
+                    .css("margin-right", ".5em");
+                var message = $("<span/>", {html: data.message, id: "message"})
+                messagerow.append(time, user, message);
+                $(data.channel + " #messages").append(messagerow);
+            });
+        });

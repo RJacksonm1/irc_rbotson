@@ -1,11 +1,18 @@
 var config;
 var nano;
 var db;
+var io;
 
-exports.initialise = function (irc_client, _config, _nano, cb) {
+exports.initialise = function (irc_client, _config, _nano, wisp, cb) {
     config = _config;
     nano = _nano(config.db_server);
     db = nano.use(config.db_name);
+    if (config.live_socket_enable) {
+        io = wisp.listen(config.live_socket_port);
+        io.sockets.on('connection', function(socket){
+            console.log("Client connected to IRC log socket");
+        });
+    }
 
     // Catch all messages from server, and database those we're interested in.
     irc_client.on("raw", function(message){
@@ -99,11 +106,22 @@ exports.initialise = function (irc_client, _config, _nano, cb) {
     });
 
     irc_client.on("KILL", function(nick, reason, channels, message){
-        for (var i = 0; i < channels.length; i++) {
-        }
+        irc_client.whois(nick, function(info){
+            for (var i = 0; i < channels.length; i++) {
+                if (config.channels.indexOf(channels[i] > -1)) {
+                        insert({
+                            timestamp: parseInt(new Date().getTime()/1000, 10),
+                            channel: channels[i],
+                            command: message.command,
+                            actor:{name: info.nick, user:info.user, host: info.host},
+                            args:[reason]
+                        });
+                }
+            }
+        });
     });
 
-    // Capture messages we send to the server.
+    // Capture messages RBotson sends to the IRC server.
     irc_client.on("selfMessage", function(target, message){
         irc_client.whois(irc_client.nick, function(info){
             if (config.channels.indexOf(target > -1)) insert({
@@ -126,4 +144,6 @@ function insert(data) {
             console.error(error);
         }
     });
+
+    if (io) io.sockets.emit("irc_message", data);
 }
