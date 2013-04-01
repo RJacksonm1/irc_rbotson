@@ -35,7 +35,6 @@ html
             //- #message_row #time:after { content: "]"}
             #message_row #user {
                 display: inline-block;
-                width: 6em;
                 text-align: right;
                 padding-right: .5em;
                 border-right: 1px solid #959595;
@@ -70,7 +69,7 @@ html
                 each channel, i in channels
                     - var active=""; if (i === 0) active="active";
                     li(class=active)
-                        a(href=channel, data-toggle="tab") #{channel}
+                        a.tab_button(href=channel, data-toggle="tab") #{channel}
 
             div.tab-content#content
                 - each channel, i in channels
@@ -93,20 +92,69 @@ html
     script(type='text/javascript', src="/socket.io/socket.io.js")
     script
         $(document).ready(function(){
+            channels = {};
+            $("#content > .irc").each(function (index) {
+                channels["#" + $(this).attr("id")] = $(this).find("#messages");
+                var $channel = channels["#" + $(this).attr("id")]
+                $channel.namePanelWidth = 0;
+                $channel.nameCharWidth = 8;
+
+                $channel.updateNamePanelWidth = function updateNamePanelWidth(name, firstRun){
+                    var width = $(name).text().length * this.nameCharWidth;
+                    if (width > 600) debugger;
+                    if (width > this.namePanelWidth) {
+                        this.namePanelWidth = width;
+                        if (!firstRun) this.setNamePanelWidths();
+                    };
+                    return this.namePanelWidth;
+                };
+                $channel.setNamePanelWidths = function setNamePanelWidths() {
+                    // Can't use .find("#users") because weird bug: http://i.imgur.com/D79k5FO.png
+                    for (var i = 0; i < this.children().length; i++) {
+                        var $child = $(this.children()[i]);
+                        $child.find("#user").css("width", this.namePanelWidth + "px");
+                    }
+                };
+                $channel.scrollToBottom = function scrollToBottom() {
+                    this.animate({"scrollTop": this[0].scrollHeight}, "slow");
+                };
+            });
+
+            $.each(channels, function (index) {
+                this.scrollToBottom();
+
+                // Can't use .find("#users") because weird bug: http://i.imgur.com/D79k5FO.png
+                for (var i = 0; i < this.children().length; i++) {
+                    var $child = $(this.children()[i]);
+                    this.updateNamePanelWidth($child.find("#user"), true);
+                }
+                this.setNamePanelWidths();
+            });
+
+            $(".tab_button").on("click", function(){
+                // Use a timeout bcuz the scrolling doesn't trigger otherwise. vOv
+                var channel = $(this).attr("href");
+                setTimeout(function(){
+                    channels[channel].scrollToBottom()
+                }, 50);
+            });
+
+            // Set up real-time message streaming
             var socket = io.connect('http://localhost');
             socket.on("irc_message", function (data) {
-                //- console.log(data);
-                var messagerow = $("<div/>", {id: "messagerow"});
-                var time = $("<span/>", {html: "[" + data.time + "]", id: "time"})
-                var user = $("<span/>", {html: data.user, id: "user"})
-                    .css("display", "inline-block")
-                    .css("width", "6em")
-                    .css("text-align", "right")
-                    .css("padding-right", ".5em")
-                    .css("border-right", "1px solid #959595")
-                    .css("margin-right", ".5em");
-                var message = $("<span/>", {html: data.message, id: "message"})
-                messagerow.append(time, user, message);
-                $(data.channel + " #messages").append(messagerow);
+                var $channel = channels[data.channel],
+                    $time = $("<span/>", {html: "[" + data.time + "]", id: "time"}),
+                    $user = $("<span/>", {html: data.user, id: "user"}).css({
+                        "display": "inline-block",
+                        "text-align": "right",
+                        "padding-right": ".5em",
+                        "border-right": "1px solid #959595",
+                        "margin-right": ".5em",
+                        "width": $channel.updateNamePanelWidth(data.user)
+                    }),
+                    $message = $("<span/>", {html: data.message, id: "message"}),
+                    $messagerow = $("<div/>", {id: "messagerow"}).append($time, $user, $message);
+                $channel.append($messagerow);
+                $channel.scrollToBottom();
             });
         });

@@ -114,7 +114,7 @@ function ircToHtml(raw_text) {
                     output += "</em>";
                 }
                 if (states.underline === true) {
-                    output += "</underline>";
+                    output += "</span>";
                 }
                 states = {
                     bold: false,
@@ -171,7 +171,17 @@ exports.dataParse = function(data){
     switch (command) {
         case "PRIVMSG":
             message = ircToHtml(args[0]);
-            user = htmlColour("Blue", actor.name);
+            user = htmlColour("Blue", "&lt;" + actor.name + "&gt;");
+
+            // Do fancy stuff if it's the bot talking.
+            if (["RBotson", "RFeedson"].indexOf(actor.name) > -1) {
+                var steamIdentifier = "[<span style=\"text-decoration: underline;\">STEAM</span>]";
+                if (message.indexOf(steamIdentifier) === 0) {
+                    // Steam message.  Be fancy
+                    message = message.substring(steamIdentifier.length + 1);
+                    user = htmlColour("Blue", "STEAM");
+                }
+            }
             break;
 
         case "JOIN":
