@@ -1,34 +1,35 @@
-var irc = require("irc");
-var fs = require("fs");
+var fs = require("fs"),
+    irc = require("irc");
 
+global.helpers = require("./helpers"),
+global.config = require("./config");
 // Load config
-var config = require("./config");
 
 // Set up IRC
 console.log("Connecting to IRC");
-var client = new irc.Client(
+global.irc = new irc.Client(
     config.irc_server,
     config.irc_nickname,
     config.irc_options
 );
 
-client.on("registered", function(message){
+global.irc.on("registered", function(message){
     console.log("Connected to IRC.");
-    if (config.irc_nickserv_pw) client.say("nickserv", "identify " + config.irc_nickserv_pw);
+    global.irc.whois(global.irc.nick, function(info){
+        global.irc.user = info.user;
+        global.irc.host = info.host;
+    });
 
-    // Initialise irc bot plugins
+    if (config.irc_nickserv_pw) global.irc.say("nickserv", "identify " + config.irc_nickserv_pw);
+
+    // Load plugins
     for (var k in config.plugins) {
-        var args = [client, config.plugins[k]];
-        for (var i = 0; i < config.plugins[k].dependencies.length; i++) {
-            args.push(require(config.plugins[k].dependencies[i]));
-        }
-        //console.log(args);
-        require("./plugins/" + config.plugins[k].name).initialise.apply(null, args);
+        require("./plugins/" + config.plugins[k].name).initialise();
     }
 });
 
 
 // Handle IRC server errors
-client.addListener('error', function(message) {
+global.irc.addListener('error', function(message) {
     console.log('error: ', message);
 });

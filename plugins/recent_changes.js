@@ -1,34 +1,22 @@
-String.prototype.capitalize = function() {
-    return this.charAt(0).toUpperCase() + this.slice(1);
-};
-Number.prototype.padLeft = function(base,chr){
-    var  len = (String(base || 10).length - String(this).length)+1;
-    return len > 0? new Array(len).join(chr || '0')+this : this;
-};
-shortenUrl = require("../helpers").shortenUrl;
+var config = global.config.plugins.recent_changes,
+    shortenUrl = global.helpers.shortenUrl,
+    http = require("http"),
+    querystring = require("querystring");
 
-var irc_client;
-var http;
-var querystring;
-
-function initialise(_irc_client, config, _http, _querystring, cb) {
-    irc_client = _irc_client;
-    http = _http;
-    querystring = _querystring;
+exports.initialise = function (cb) {
+    var checkRecentChangesCB = function checkRecentChangesCB(wiki_config) {
+      return function(){
+        checkRecentChanges(wiki_config);
+      };
+    };
 
     for (var i = 0; i < config.wikis.length; i++) {
-        checkRecentChanges(config.wikis[i]);
         setInterval(checkRecentChangesCB(config.wikis[i]), config.wikis[i].interval);
     }
+
     console.log("Loaded " + config.name);
     if (cb) cb();
-}
-
-function checkRecentChangesCB(wiki_config) {
-  return function(){
-    checkRecentChanges(wiki_config);
-  };
-}
+};
 
 function checkRecentChanges(wiki_config) {
     getRCFromMediaWiki(wiki_config.api_url, wiki_config.params, function(rcs){
@@ -53,7 +41,7 @@ function getRCFromMediaWiki(rc_api_url, rc_params, cb, rc_start) {
 
     var params = rc_params;
     params.nonsensebcuzcache = parseInt(new Date().getTime()/1000, 10);
-    if (rc_start !== null) (params.rcstart = rc_start);
+    if (rc_start) (params.rcstart = rc_start);
 
     var url = rc_api_url + querystring.stringify(params) + "&";
 
@@ -79,14 +67,14 @@ function rcToIRC(rc, channel) {
     console.log("Sending RC to IRC.");
 
     var url = "";
-    if (rc.type == "log") url = rc.base_url + "?title=" + rc.title.replace("_", " ");
+    if (rc.type === "log") url = rc.base_url + "?title=" + rc.title.replace("_", " ");
     else url = rc.base_url + "?title=" + rc.title.replace("_", " ") + "&diff=" + rc.revid + "&oldid=" + rc.old_revid;
 
     shortenUrl(url, function(url){
         var flags = "";
         if ("redirect" in rc) flags += "R";
-        if (rc.type == "new") flags += "N";
-        if (rc.type == "log") flags += "L";
+        if (rc.type === "new") flags += "N";
+        if (rc.type === "log") flags += "L";
         if ("minor" in rc) flags +="m";
         if ("bot" in rc) flags +="b";
         if (!flags.length) flags = "-";
@@ -111,8 +99,6 @@ function rcToIRC(rc, channel) {
             (rc.comment) ? " (\x0314" + rc.comment.replace(/(?:\[|\]|\{|\})/g,"") +"\x03)" : "",
             dateFm
             );
-        irc_client.say(channel, statement);
+        global.irc.say(channel, statement);
     });
 }
-
-exports.initialise = initialise;

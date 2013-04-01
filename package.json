@@ -11,11 +11,11 @@
     "irc": "*",
     "express": "3.*",
     "googleapis": "*",
-    "steam": "*",
     "jade": "*",
-    "node-tokenizer": "*",
     "socket.io": "*",
+    "validator": "*",
     "socket.io-client": "*",
-    "validator": "*"
+    "steam": "https://github.com/RJacksonm1/node-steam/tarball/master",
+    "node-tokenizer": "https://github.com/RJacksonm1/node-tokenizer/tarball/master"
   }
 }
