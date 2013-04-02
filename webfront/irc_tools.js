@@ -63,7 +63,7 @@ exports.htmlColour = htmlColour;
 
 function ircToHtml(raw_text) {
 
-    sanitized_text = validator.sanitize(raw_text).entityEncode()
+    sanitized_text = validator.sanitize(raw_text).entityEncode();
     var tokens = tokenizer.tokenize(sanitized_text);
     var states = {
         bold: false,
@@ -201,7 +201,7 @@ exports.dataParse = function(data){
         case "MODE":
             if (data.actedUpon) {
                 var actedUpon = data.actedUpon;
-                modes = args[0].substring(1);
+                modes = args[0];
                 sign = args[0].substring(0, 1);
                 message = util.format((sign == "+") ? "%s gives %s to %s" : "%s removes %s from %s", actor.name, modes, actedUpon.name);
             }

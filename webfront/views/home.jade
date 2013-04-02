@@ -92,7 +92,7 @@ html
     script(type='text/javascript', src="/socket.io/socket.io.js")
     script
         $(document).ready(function(){
-            channels = {};
+            var channels = {};
             $("#content > .irc").each(function (index) {
                 channels["#" + $(this).attr("id")] = $(this).find("#messages");
                 var $channel = channels["#" + $(this).attr("id")]
@@ -100,7 +100,8 @@ html
                 $channel.nameCharWidth = 8;
 
                 $channel.updateNamePanelWidth = function updateNamePanelWidth(name, firstRun){
-                    var width = $(name).text().length * this.nameCharWidth;
+                    var text = (name !== "*") ? $(name).text() : name;
+                    var width = text.length * this.nameCharWidth;
                     if (width > 600) debugger;
                     if (width > this.namePanelWidth) {
                         this.namePanelWidth = width;
@@ -142,6 +143,7 @@ html
             // Set up real-time message streaming
             var socket = io.connect('http://localhost');
             socket.on("irc_message", function (data) {
+
                 var $channel = channels[data.channel],
                     $time = $("<span/>", {html: "[" + data.time + "]", id: "time"}),
                     $user = $("<span/>", {html: data.user, id: "user"}).css({
