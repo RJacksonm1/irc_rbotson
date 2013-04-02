@@ -1,9 +1,10 @@
 var config = global.config.plugins.irc_log,
+    Q = require("q"),
     io = require("socket.io"),
     db = require("nano")(config.db_server).use(config.db_name),
     socket;
 
-exports.initialise = function (cb) {
+module.exports = function (cb) {
     if (config.live_socket_enable) {
         socket = io.listen(config.live_socket_port);
         socket.sockets.on('connection', function(_socket){
@@ -27,6 +28,8 @@ exports.initialise = function (cb) {
                     },
                     args: []
                 };
+
+                var promise;
 
                 switch (message.command) {
                     case "PRIVMSG":
@@ -59,13 +62,18 @@ exports.initialise = function (cb) {
 
                         // This triggers if the mode action applies to a user.
                         if (message.args[2]) {
-                            global.irc.whois(message.args[2], function(info){
-                                data.actedUpon = {
-                                    name: info.name,
-                                    user: info.user,
-                                    host: info.host
-                                };
-                            });
+                            promise = (function(){
+                                var defer = Q.defer();
+                                global.irc.whois(message.args[2], function(info){
+                                    data.actedUpon = {
+                                        name: info.nick,
+                                        user: info.user,
+                                        host: info.host
+                                    };
+                                    defer.resolve();
+                                });
+                                return defer.promise;
+                            }());
                         }
                         break;
 
@@ -76,18 +84,28 @@ exports.initialise = function (cb) {
                         data.args.push(message.args[2]);
 
                         // Kicked user
-                        if (message.args[1]) {
+                        promise = (function(){
+                            var defer = Q.defer();
                             global.irc.whois(message.args[1], function(info){
                                 data.actedUpon = {
-                                    name: info.name,
+                                    name: info.nick,
                                     user: info.user,
                                     host: info.host
                                 };
+                                defer.resolve();
                             });
-                        }
+                            return defer.promise;
+                        }());
                         break;
                 }
-                insert(data);
+                if (promise) {
+                    promise.done(function(){
+                        insert(data);
+                    });
+                }
+                else {
+                    insert(data);
+                }
             }
         })
         .on("NICK", function(oldNick, newNick, channels, message){

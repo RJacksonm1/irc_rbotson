@@ -1,9 +1,12 @@
 var config = global.config.plugins.recent_changes,
     shortenUrl = global.helpers.shortenUrl,
+    strCapitalize = global.helpers.strCapitalize,
+    strCapitalize = global.helpers.strCapitalize,
+    numPadLeft = global.helpers.numPadLeft,
     http = require("http"),
     querystring = require("querystring");
 
-exports.initialise = function (cb) {
+module.exports = function (cb) {
     var checkRecentChangesCB = function checkRecentChangesCB(wiki_config) {
       return function(){
         checkRecentChanges(wiki_config);
@@ -86,12 +89,12 @@ function rcToIRC(rc, channel) {
         if (Math.abs(sizeDiff) >= 512) sizeDiffFm = "\x02" + sizeDiffFm + "\x02";
 
         var date = new Date(rc.timestamp),
-            dateFm = [ date.getUTCHours().padLeft(), date.getUTCMinutes().padLeft(), date.getUTCSeconds().padLeft()].join(":");
+            dateFm = [ numPadLeft(date.getUTCHours()), numPadLeft(date.getUTCMinutes()), numPadLeft(date.getUTCSeconds())].join(":");
 
         statement = require("util").format(
             "[\x1fRC\x1f] \x02\x0304%s\x03\x02%s \x02\x0310%s\x03 \x02by \x02\x0306%s\x03\x02 - %s (%s)%s (\x0305%s\x03)",
             flags,
-            (rc.type == "log") ? " \x0304" + rc.logaction.capitalize() + "\x03" : "",
+            (rc.type == "log") ? " \x0304" + strCapitalize(rc.logaction) + "\x03" : "",
             rc.title,
             rc.user,
             url,

@@ -24,7 +24,7 @@ global.irc.on("registered", function(message){
 
     // Load plugins
     for (var k in config.plugins) {
-        require("./plugins/" + config.plugins[k].name).initialise();
+        require("./plugins/" + config.plugins[k].name)();
     }
 });
 

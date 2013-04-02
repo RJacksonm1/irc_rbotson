@@ -7,7 +7,7 @@ var config = global.config.plugins.steam_relay,
     sentry,
     bot;
 
-exports.initialise = function (cb) {
+module.exports = function (cb) {
     if (fs.existsSync('servers')) {
         steam.servers = JSON.parse(fs.readFileSync('servers'));
     }
@@ -83,15 +83,27 @@ exports.initialise = function (cb) {
     global.irc
         .on("message#", function onIrcMessage(nick, to, text, message){
             if (to in channelsToGroupids) {
+                text = text.replace(/[\x02\x1f\x16\x0f]|\x03\d{0,2}(?:,\d{0,2})?/g, "");
                 steamSay(channelsToGroupids[to], "<" + nick + "> " + text, steam.EChatEntryType.ChatMsg);
 
-                var command = (new RegExp(global.irc.opt.nick + ":?\\s*(.*)", "i")).exec(text);
+                var command = (new RegExp(global.irc.nick + ":?\\s*(.*)", "i")).exec(text);
                 if (command) {
                     switch (command[1]) {
                         case "group":
-                            global.irc.say(to, "steam://friends/joinchat/" + channelsToGroupids[to]);
+                            global.irc.say(to, message.nick + ": steam://friends/joinchat/" + channelsToGroupids[to]);
                             break;
                     }
+                }
+            }
+        })
+        .on("selfMessage", function(target, message){
+            if (target in channelsToGroupids) {
+                message = message.replace(/[\x02\x1f\x16\x0f]|\x03\d{0,2}(?:,\d{0,2})?/g, "");
+                if (message.indexOf("[STEAM]") !== 0) {
+                    // Delay by 1 second in case it's an IRC command and selfMessage is being parsed before message.
+                    setTimeout(function(){
+                        bot.sendMessage(channelsToGroupids[target], message, steam.EChatEntryType.ChatMsg);
+                    }, 1000);
                 }
             }
         })

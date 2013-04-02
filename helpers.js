@@ -16,10 +16,11 @@ exports.shortenUrl = function shortenUrl(url, cb) {
     });
 };
 
-String.prototype.capitalize = function() {
-    return this.charAt(0).toUpperCase() + this.slice(1);
+exports.strCapitalize = function strCapitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
 };
-Number.prototype.padLeft = function(base,chr){
-    var  len = (String(base || 10).length - String(this).length)+1;
-    return len > 0? new Array(len).join(chr || '0')+this : this;
+
+exports.numPadLeft = function numPadLeft(num, base, chr){
+    var  len = (String(base || 10).length - String(num).length)+1;
+    return len > 0? new Array(len).join(chr || '0')+num : num;
 };
