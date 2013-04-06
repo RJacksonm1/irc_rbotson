@@ -13,23 +13,23 @@ global.irc = new irc.Client(
     config.irc_options
 );
 
-global.irc.on("registered", function(message){
-    console.log("Connected to IRC.");
-    global.irc.whois(global.irc.nick, function(info){
-        global.irc.user = info.user;
-        global.irc.host = info.host;
+global.irc
+    .on("registered", function(message){
+        console.log("Connected to IRC.");
+        global.irc.whois(global.irc.nick, function(info){
+            global.irc.user = info.user;
+            global.irc.host = info.host;
+        });
+
+        if (config.irc_nickserv_pw) global.irc.say("nickserv", "identify " + config.irc_nickserv_pw);
+
+        // Load plugins
+        for (var k in config.plugins) {
+            require("./plugins/" + config.plugins[k].name)();
+        }
+    })
+
+    // Handle IRC server errors
+    .on('error', function(message) {
+        console.log('error: ', message);
     });
-
-    if (config.irc_nickserv_pw) global.irc.say("nickserv", "identify " + config.irc_nickserv_pw);
-
-    // Load plugins
-    for (var k in config.plugins) {
-        require("./plugins/" + config.plugins[k].name)();
-    }
-});
-
-
-// Handle IRC server errors
-global.irc.addListener('error', function(message) {
-    console.log('error: ', message);
-});

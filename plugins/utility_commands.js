@@ -1,5 +1,56 @@
 var config = global.config.plugins.utility_commands;
 
+var onUserIsNickservAuthed = function onUserIsNickservAuthed (user, cb) {
+    var noticeCheckAttempts = 0;
+    var maxNoticeCheckAttempts = 15;
+    global.irc.say("NickServ", "ACC " + user);
+
+    /* Cannot use "on" here as the anonymous function would continue to
+    fire for future calls of this method; thus firing the current-state
+    callback in future events.*/
+    var onNoticeNickServAuthCheck = function onNoticeNickServAuthCheck(nick, to, text){
+        var notWhoWeWant = false;
+        var authResponse = /(.+?) ACC ([0-3])/.exec(text);
+        if (nick === "NickServ" && to === global.irc.nick && authResponse) {
+            if (authResponse[1] === user) {
+                switch (authResponse[2]) {
+                    case "0":
+                        // User not online or nickname not registered.
+                        break;
+
+                    case "1":
+                        // User not recognized as nicknames owner.
+                        break;
+
+                    case "2":
+                        // User recognized as owner via access list.
+                        cb();
+                        break;
+                    case "3":
+                        // User recignozed as owner via password id.
+                        cb();
+                        break;
+                }
+            }
+            else {
+                notWhoWeWant = true;
+            }
+        }
+        if (notWhoWeWant && noticeCheckAttempts < maxNoticeCheckAttempts) {
+            // If this notice is not the one we want, try again.
+            noticeCheckAttempts++;
+            global.irc.once("notice", onNoticeNickServAuthCheck);
+        }
+    };
+    global.irc.once("notice", onNoticeNickServAuthCheck);
+};
+
+var onUserIsBotAuthed = function onUserIsBotAuthed(user, cb) {
+    onUserIsNickservAuthed(user, function(){
+        if (config.authed_users.indexOf(user) > -1) cb();
+    });
+};
+
 module.exports = function (cb) {
 
     global.irc.on("message", function onIrcMessage(from, to, message){
@@ -8,11 +59,9 @@ module.exports = function (cb) {
         // Trim leading or trailing whitespace
         command = (command) ? command[1].replace(/^\s+|\s+$/g, "") : undefined;
 
-        // Auth-required commands
         if (command) {
-
             // Auth commands
-            if (["RJackson"].indexOf(from) > -1) {
+            onUserIsBotAuthed(from, function(){
                 switch (true) {
                     case /^op\s*(.*)/.test(command):
                         (function (){
@@ -42,7 +91,12 @@ module.exports = function (cb) {
                         (function (){
                             // TODO Check target exists before joining
                             var target = /^join\s*(.*)/.exec(command)[1] || undefined;
-                            (target) ? global.irc.join(target) : global.irc.say(to, "Give me a target you fack");
+                            if (target) {
+                                global.irc.join(target);
+                            }
+                            else {
+                                global.irc.say(to, from + ": That ain't no channel I've ever heard of.");
+                            }
                         }());
                         break;
 
@@ -54,7 +108,7 @@ module.exports = function (cb) {
                         }());
                         break;
                 }
-            }
+            });
 
             // Free-for-all commands
             switch (true) {

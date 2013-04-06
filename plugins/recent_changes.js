@@ -55,6 +55,8 @@ function getRCFromMediaWiki(rc_api_url, rc_params, cb, rc_start) {
         });
         res.on("end", function(){
             console.log("Received data from RC check");
+            // TODO:  Verify response is JSON (not html, like mediawiki sometiems errors with)
+            // If not, respond X times then give up.
             var js_data = JSON.parse(data);
             cb(js_data.query.recentchanges);
 

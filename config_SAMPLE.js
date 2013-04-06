@@ -48,7 +48,7 @@ config.google_api_key = "";
 config.irc_server = "irc.freenode.com";
 config.irc_nickname = "RBotson";
 config.irc_nickserv_pw = null;
-var irc_channels = ["#somechannel"];
+config.irc_channels = ["#somechannel"];
 
 config.irc_options = {
     userName: 'RBotson',
@@ -57,7 +57,7 @@ config.irc_options = {
     debug: true,
     showErrors: false,
     autoRejoin: true,
-    channels: irc_channels,
+    channels: config.irc_channels,
     floodProtection: true,
     floodProtectionDelay: 1000
 };
