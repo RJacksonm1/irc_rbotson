@@ -1,6 +1,6 @@
 var config = global.config.plugins.steam_relay,
     shortenUrl = global.helpers.shortenUrl,
-    steam = require("Steam"),
+    steam = require("steam"),
     fs = require("fs"),
     groupidsToChannels = {},
     channelsToGroupids = {},

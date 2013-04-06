@@ -118,6 +118,9 @@ module.exports = function (cb) {
                 case /^boop\s*(.*)/.test(command):
                     global.irc.say(to, from + ": beep");
                     break;
+                case /^(?:src|source|sauce)\s*(.*)/.test(command):
+                    global.irc.say(to, from + ": https://github.com/RJacksonm1/irc_rbotson");
+                    break;
             }
         }
 

@@ -55,15 +55,19 @@ function getRCFromMediaWiki(rc_api_url, rc_params, cb, rc_start) {
         });
         res.on("end", function(){
             console.log("Received data from RC check");
-            // TODO:  Verify response is JSON (not html, like mediawiki sometiems errors with)
-            // If not, respond X times then give up.
-            var js_data = JSON.parse(data);
-            cb(js_data.query.recentchanges);
-
-            if ("query-continue" in js_data) {
-                cosole.log("Query-continue present, grabbing more data");
-                getRCFromMediaWiki(rc_api_url, rc_params, cb, js_data["query-continue"].recentchanges.rcstart);
+            // TODO:  Retry X times on fail.
+            try {
+                var js_data = JSON.parse(data);
+                cb(js_data.query.recentchanges);
+                if ("query-continue" in js_data) {
+                    cosole.log("Query-continue present, grabbing more data");
+                    getRCFromMediaWiki(rc_api_url, rc_params, cb, js_data["query-continue"].recentchanges.rcstart);
+                }
             }
+            catch (e) {
+                console.log("[RECENT CHANGES] Error on json.parse: ", e);
+            }
+
         });
     });
 }

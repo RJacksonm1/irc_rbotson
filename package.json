@@ -9,7 +9,7 @@
     "nano": "*",
     "querystring": "*",
     "irc": "*",
-    "express": "3.*",
+    "express": "*",
     "googleapis": "*",
     "jade": "*",
     "socket.io": "*",
