@@ -1,6 +1,10 @@
 var config = {};
 
 config.plugins = {
+    utility_commands: {
+        name: "utility_commands",
+        authed_users: ["RJackson"] // Nickserv ids.
+    },
     steam_relay: {
         name: "steam_relay",
         dependencies: ["steam", "fs"],
