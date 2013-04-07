@@ -41,7 +41,7 @@ module.exports = function (cb) {
         })
         .on("friendMsg", function onSteamFriendMessage(source, message, type, chatter){
             if (type == steam.EChatEntryType.ChatMsg) {
-                bot.sendMessage(source, "Hi. I currently have nothing to say to you, sorry!", Steam.EChatEntryType.ChatMsg);
+                bot.sendMessage(source, "Hi. I currently have nothing to say to you, sorry!", steam.EChatEntryType.ChatMsg);
             }
         })
         .on('chatStateChange', function onSteamChatStateChange(stateChange, chatterActedOn, groupid, chatterActedBy) {
