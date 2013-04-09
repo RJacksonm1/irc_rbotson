@@ -52,15 +52,15 @@ function getRCFromMediaWiki(rc_api_url, rc_params, cb, rc_start) {
         var data = "";
         res.on("data", function(chunk){
             data += chunk;
-        });
-        res.on("end", function(){
+        })
+        .on("end", function(){
             console.log("Received data from RC check");
             // TODO:  Retry X times on fail.
             try {
                 var js_data = JSON.parse(data);
                 cb(js_data.query.recentchanges);
                 if ("query-continue" in js_data) {
-                    cosole.log("Query-continue present, grabbing more data");
+                    console.log("Query-continue present, grabbing more data");
                     getRCFromMediaWiki(rc_api_url, rc_params, cb, js_data["query-continue"].recentchanges.rcstart);
                 }
             }
@@ -68,6 +68,9 @@ function getRCFromMediaWiki(rc_api_url, rc_params, cb, rc_start) {
                 console.log("[RECENT CHANGES] Error on json.parse: ", e);
             }
 
+        })
+        .on("error", function(){
+            console.log("getRCFromMediaWiki got an error event =(");
         });
     });
 }

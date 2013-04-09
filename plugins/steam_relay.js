@@ -77,6 +77,9 @@ module.exports = function (cb) {
         })
         .on('servers', function onSteamServers(servers) {
             fs.writeFile('servers', JSON.stringify(servers));
+        })
+        .on('error', function (){
+            console.log("Steam caught an error event =(");
         });
 
     // IRC Events
