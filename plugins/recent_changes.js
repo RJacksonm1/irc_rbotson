@@ -14,7 +14,7 @@ module.exports = function (cb) {
     };
 
     for (var i = 0; i < config.wikis.length; i++) {
-        setInterval(checkRecentChangesCB(config.wikis[i]), config.wikis[i].interval);
+        if (config.wikis[i].enabled) setInterval(checkRecentChangesCB(config.wikis[i]), config.wikis[i].interval);
     }
 
     console.log("Loaded " + config.name);
