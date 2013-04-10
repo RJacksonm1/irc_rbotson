@@ -2,8 +2,23 @@ var config = global.config.plugins.irc_log,
     util = require("util"),
     Q = require("q"),
     io = require("socket.io"),
-    db = require("nano")(config.db_server).use(config.db_name),
+    nano = require("nano")(config.db_server),
+    db = nano.use(config.db_name),
+    authCookie = "",
     socket;
+
+var nanoAuth = function(){
+    nano.auth(config.db_user, config.db_pass, function (err, body, headers) {
+        if (err) {
+            util.log("irc_log.js - nano auth error: " + err);
+        } else {
+            if (headers && headers["set-cookie"]) {
+                util.log("irc_log.js - nano auth received cookie from couchdb");
+                authCookie = headers["set-cookie"];
+            }
+        }
+    });
+};
 
 module.exports = function (cb) {
     if (config.live_socket_enable) {
@@ -13,6 +28,9 @@ module.exports = function (cb) {
             });
     }
 
+    // Cookies last for 10 minutes; auth every 9 bcuz 10 is 2 and 2 is 2 soon.
+    nanoAuth();
+    setInterval(nanoAuth, 9 * 60 * 1000);
     // Catch all messages from server, and database those we're interested in.
     global.irc
         .on("raw", function(message){
@@ -121,7 +139,7 @@ module.exports = function (cb) {
                 args: [newNick]
             }, channels);
         })
-        .on("KILL", function(nick, reason, channels, message){
+        .on("KILL QUIT", function(nick, reason, channels, message){
             global.irc.whois(nick, function(info){
                 insertMultiChannels({
                     timestamp: parseInt(new Date().getTime()/1000, 10),
@@ -157,9 +175,12 @@ module.exports = function (cb) {
 
 function insert(data) {
     if (config.channels.indexOf(data.channel) > -1) {
-        db.insert(data, function(error, http_body, http_headers) {
-            if(error) {
+        db.insert(data, function(err, body, headers) {
+            if(err) {
                 util.log("irc_log.js error inserting data into db: " + error);
+            }
+            else if (headers && headers["set-cookie"]) {
+                authCookie = headers["set-cookie"];
             }
         });
     }

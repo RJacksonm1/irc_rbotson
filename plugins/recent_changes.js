@@ -70,8 +70,8 @@ function getRCFromMediaWiki(rc_api_url, rc_params, cb, rc_start) {
             }
 
         })
-        .on("error", function(){
-            util.log("recent_changes.js - http callback, res, got an error event =(");
+        .on("error", function(err){
+            util.log("recent_changes.js - http callback, res, got an error event =( " + err);
         });
     });
 }

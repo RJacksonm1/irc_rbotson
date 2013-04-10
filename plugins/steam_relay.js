@@ -79,8 +79,8 @@ module.exports = function (cb) {
         .on('servers', function onSteamServers(servers) {
             fs.writeFile('servers', JSON.stringify(servers));
         })
-        .on('error', function (){
-            util.log("steam_relay.js - Steam caught an error event =(");
+        .on('error', function (err){
+            util.log("steam_relay.js - Steam caught an error event =( " + err);
         });
 
     // IRC Events

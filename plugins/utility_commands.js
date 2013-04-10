@@ -58,7 +58,7 @@ module.exports = function (cb) {
         var command = (new RegExp(global.irc.nick + ":?\\s*(.*)", "i")).exec(message);
 
         // Trim leading or trailing whitespace
-        command = (command) ? command[1].replace(/^\s+|\s+$/g, "") : undefined;
+        command = (command) ? command[1].replace(/^\s+|\s+$/g, "").toLowerCase() : undefined;
 
         if (command) {
             // Auth commands

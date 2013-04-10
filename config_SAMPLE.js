@@ -19,6 +19,8 @@ config.plugins = {
         channels: ["#somechannel"],
         db_name: "rbotson_irc_log",
         db_server: "http://localhost:5984",
+        db_user: "",
+        db_pass: "",
         live_socket_enable: true,  // To send live updates to webfront.
         live_socket_port: 2999  // To send live updates to webfront.
     },
