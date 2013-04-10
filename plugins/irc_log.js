@@ -155,10 +155,10 @@ module.exports = function (cb) {
 };
 
 function insert(data) {
-    if (config.channels.indexOf(data.channel > -1)) {
+    if (config.channels.indexOf(data.channel) > -1) {
         db.insert(data, function(error, http_body, http_headers) {
             if(error) {
-                console.error(error);
+                util.log("irc_log.js error inserting data into db: " + error);
             }
         });
     }
