@@ -1,4 +1,5 @@
 var config = global.config.plugins.recent_changes,
+    util = require("util"),
     shortenUrl = global.helpers.shortenUrl,
     strCapitalize = global.helpers.strCapitalize,
     strCapitalize = global.helpers.strCapitalize,
@@ -17,7 +18,7 @@ module.exports = function (cb) {
         if (config.wikis[i].enabled) setInterval(checkRecentChangesCB(config.wikis[i]), config.wikis[i].interval);
     }
 
-    console.log("Loaded " + config.name);
+    util.log("Plugin loaded " + config.name);
     if (cb) cb();
 };
 
@@ -54,7 +55,7 @@ function getRCFromMediaWiki(rc_api_url, rc_params, cb, rc_start) {
             data += chunk;
         })
         .on("end", function(){
-            console.log("Received data from RC check");
+            util.log("recent_changes.js - Received data from RC check");
             // TODO:  Retry X times on fail.
             try {
                 var js_data = JSON.parse(data);
@@ -65,18 +66,18 @@ function getRCFromMediaWiki(rc_api_url, rc_params, cb, rc_start) {
                 }
             }
             catch (e) {
-                console.log("[RECENT CHANGES] Error on json.parse: ", e);
+                util.log("recent_changes.js - Error on json.parse: ", e);
             }
 
         })
         .on("error", function(){
-            console.log("getRCFromMediaWiki got an error event =(");
+            util.log("recent_changes.js - http callback, res, got an error event =(");
         });
     });
 }
 
 function rcToIRC(rc, channel) {
-    console.log("Sending RC to IRC.");
+    util.log("recent_changes.js - Sending RC to IRC.");
 
     var url = "";
     if (rc.type === "log") url = rc.base_url + "?title=" + rc.title.replace("_", " ");
@@ -98,7 +99,11 @@ function rcToIRC(rc, channel) {
         if (Math.abs(sizeDiff) >= 512) sizeDiffFm = "\x02" + sizeDiffFm + "\x02";
 
         var date = new Date(rc.timestamp),
-            dateFm = [ numPadLeft(date.getUTCHours()), numPadLeft(date.getUTCMinutes()), numPadLeft(date.getUTCSeconds())].join(":");
+            dateFm = [ numPadLeft(date.getUTCHours()), numPadLeft(date.getUTCMinutes()), numPadLeft(date.getUTCSeconds())].join(":"),
+            comment = (function(comment){
+                // MW link regex.
+                // TODO restructure with Q promises.
+            }(rc.comment));
 
         statement = require("util").format(
             "[\x1fRC\x1f] \x02\x0304%s\x03\x02%s \x02\x0310%s\x03 \x02by \x02\x0306%s\x03\x02 - %s (%s)%s (\x0305%s\x03)",

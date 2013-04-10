@@ -1,4 +1,5 @@
 var config = global.config.plugins.steam_relay,
+    util = require("util"),
     shortenUrl = global.helpers.shortenUrl,
     steam = require("steam"),
     fs = require("fs"),
@@ -79,7 +80,7 @@ module.exports = function (cb) {
             fs.writeFile('servers', JSON.stringify(servers));
         })
         .on('error', function (){
-            console.log("Steam caught an error event =(");
+            util.log("steam_relay.js - Steam caught an error event =(");
         });
 
     // IRC Events
@@ -125,7 +126,6 @@ module.exports = function (cb) {
             if (channel in channelsToGroupids) steamSay(channelsToGroupids[channel], by + ' has kicked ' + nick + ' from ' + channel + ' (' + reason + ')');
         })
         .on('join', function(channel, nick) {
-            console.log(channel, nick);
             if (channel in channelsToGroupids) steamSay(channelsToGroupids[channel], nick + ' has joined ' + channel);
         })
         .on('part', function(channel, nick) {
@@ -137,7 +137,7 @@ module.exports = function (cb) {
             }
         });
 
-    console.log("Loaded " + config.name);
+    util.log("Loaded " + config.name);
     if (cb) cb();
 };
 

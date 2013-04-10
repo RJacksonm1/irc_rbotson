@@ -27,7 +27,7 @@ config.plugins = {
         dependencies: ["http", "querystring"],
         wikis: [
             {
-                enabled: false,
+                enabled: true,
                 irc_channel: "#somechannel",
                 interval: 30000,
                 api_url: "http://www.the_best_wiki.com/w/api.php?",

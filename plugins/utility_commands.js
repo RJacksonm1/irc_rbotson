@@ -1,4 +1,5 @@
-var config = global.config.plugins.utility_commands;
+var config = global.config.plugins.utility_commands
+    util = require("util");
 
 var onUserIsNickservAuthed = function onUserIsNickservAuthed (user, cb) {
     var noticeCheckAttempts = 0;
@@ -126,6 +127,6 @@ module.exports = function (cb) {
 
     });
 
-    console.log("Loaded " + config.name);
+    util.log("Loaded " + config.name);
     if (cb) cb();
 };

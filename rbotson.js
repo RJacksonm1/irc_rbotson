@@ -1,4 +1,5 @@
 var fs = require("fs"),
+    util = require("util"),
     irc = require("irc");
 
 global.helpers = require("./helpers"),
@@ -6,7 +7,7 @@ global.config = require("./config");
 // Load config
 
 // Set up IRC
-console.log("Connecting to IRC");
+util.log("rbotson.js - Connecting to IRC");
 global.irc = new irc.Client(
     config.irc_server,
     config.irc_nickname,
@@ -15,7 +16,7 @@ global.irc = new irc.Client(
 
 global.irc
     .on("registered", function(message){
-        console.log("Connected to IRC.");
+        util.log("rbotson.js - Connected to IRC.");
         global.irc.whois(global.irc.nick, function(info){
             global.irc.user = info.user;
             global.irc.host = info.host;
@@ -31,5 +32,5 @@ global.irc
 
     // Handle IRC server errors
     .on('error', function(message) {
-        console.log('error: ', message);
+        util.log('IRC error: ', message);
     });

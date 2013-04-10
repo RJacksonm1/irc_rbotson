@@ -1,4 +1,5 @@
 var config = global.config.plugins.irc_log,
+    util = require("util"),
     Q = require("q"),
     io = require("socket.io"),
     db = require("nano")(config.db_server).use(config.db_name),
@@ -8,7 +9,7 @@ module.exports = function (cb) {
     if (config.live_socket_enable) {
         socket = io.listen(config.live_socket_port);
         socket.sockets.on('connection', function(_socket){
-                console.log("Client connected to IRC log socket");
+                util.log("irc_log.js - Client connected to IRC log socket");
             });
     }
 
@@ -150,7 +151,7 @@ module.exports = function (cb) {
             });
         });
 
-    console.log("Loaded " + config.name);
+    util.log("Loaded " + config.name);
     if (cb) cb();
 };
 
