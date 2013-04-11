@@ -127,7 +127,7 @@ module.exports = function (cb) {
                 }
             }
         })
-        .on("NICK", function(oldNick, newNick, channels, message){
+        .on("nick", function(oldNick, newNick, channels, message){
             insertMultiChannels({
                 timestamp: parseInt(new Date().getTime()/1000, 10),
                 command: message.command,
@@ -139,7 +139,21 @@ module.exports = function (cb) {
                 args: [newNick]
             }, channels);
         })
-        .on("KILL QUIT", function(nick, reason, channels, message){
+        .on("kill", function(nick, reason, channels, message){
+            global.irc.whois(nick, function(info){
+                insertMultiChannels({
+                    timestamp: parseInt(new Date().getTime()/1000, 10),
+                    command: message.command,
+                    actor: {
+                        name: info.nick,
+                        user: info.user,
+                        host: info.host
+                    },
+                    args: [reason]
+                }, channels);
+            });
+        })
+        .on("quit", function(nick, reason, channels, message){
             global.irc.whois(nick, function(info){
                 insertMultiChannels({
                     timestamp: parseInt(new Date().getTime()/1000, 10),
