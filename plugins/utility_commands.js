@@ -1,4 +1,4 @@
-var config = global.config.plugins.utility_commands
+var config = global.config.plugins.utility_commands,
     util = require("util");
 
 var onUserIsNickservAuthed = function onUserIsNickservAuthed (user, cb) {
@@ -106,6 +106,13 @@ module.exports = function (cb) {
                             // TODO Refuse if logging or relay is enabled.
                             var target = /^part\s*(.*)/.exec(command)[1] || to;
                             global.irc.part(target);
+                        }());
+                        break;
+
+                    case /^reload/.test(command):
+                        (function (){
+                            global.loadConfig();
+                            global.irc.say("Reloading config.");
                         }());
                         break;
                 }

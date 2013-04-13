@@ -1,5 +1,8 @@
+
 config.js
+config.json
 config_live.js
+config_live.json
 raw_log.txt
 node_modules/
 sentry

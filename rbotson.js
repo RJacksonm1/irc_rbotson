@@ -3,9 +3,19 @@ var fs = require("fs"),
     irc = require("irc");
 
 global.helpers = require("./helpers");
-global.config = require("./config");
+// global.config = require("./config");
 
 // Load config
+global.loadConfig = function loadConfig () {
+    if (fs.existsSync('config.json')) {
+        global.config = JSON.parse(fs.readFileSync('config.json'));
+        // TODO: Deal with config options that are used when bot starts; assuming reload.
+    }
+    else {
+        throw new Error("No config.js, wat do vOv?!");
+    }
+};
+global.loadConfig();
 
 // Set up IRC
 util.log("rbotson.js - Connecting to IRC");
