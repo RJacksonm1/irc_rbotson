@@ -44,8 +44,10 @@ function getRCFromMediaWiki(rc_api_url, rc_params, cb, rc_start) {
     rc_start = rc_start || null;
 
     var params = rc_params;
-    params.nonsensebcuzcache = parseInt(new Date().getTime()/1000, 10);
+    if (!params.rcstart) params.rcstart = parseInt(new Date().getTime()/1000, 10);
     if (rc_start) (params.rcstart = rc_start);
+
+    params.nonsensebcuzcache = parseInt(new Date().getTime()/1000, 10);
 
     var url = rc_api_url + querystring.stringify(params) + "&";
 
@@ -81,41 +83,42 @@ function rcToIRC(rc, channel) {
 
     var url = "";
     if (rc.type === "log") url = rc.base_url + "?title=" + rc.title.replace("_", " ");
-    else url = rc.base_url + "?title=" + rc.title.replace("_", " ") + "&diff=" + rc.revid + "&oldid=" + rc.old_revid;
+    else url = rc.base_url + "?diff=" + rc.revid;
 
-    shortenUrl(url, function(url){
-        var flags = "";
-        if ("redirect" in rc) flags += "R";
-        if (rc.type === "new") flags += "N";
-        if (rc.type === "log") flags += "L";
-        if ("minor" in rc) flags +="m";
-        if ("bot" in rc) flags +="b";
-        if (!flags.length) flags = "-";
+    var flags = "";
+    if ("redirect" in rc) flags += "R";
+    if (rc.type === "new") flags += "N";
+    if (rc.type === "log") flags += "L";
+    if ("minor" in rc) flags +="m";
+    if ("bot" in rc) flags +="b";
+    if (!flags.length) flags = "-";
 
-        sizeDiff = (rc.newlen - rc.oldlen);
-        if (sizeDiff < 0) sizeDiffFm = "\x0304" + sizeDiff + "\x03";
-        else if (sizeDiff === 0) sizeDiffFm = "\x0314" + sizeDiff + "\x03";
-        else if (sizeDiff > 0) sizeDiffFm = "\x0303+" + sizeDiff + "\x03";
-        if (Math.abs(sizeDiff) >= 512) sizeDiffFm = "\x02" + sizeDiffFm + "\x02";
+    sizeDiff = (rc.newlen - rc.oldlen);
+    if (sizeDiff < 0) sizeDiffFm = "\x0304" + sizeDiff + "\x03";
+    else if (sizeDiff === 0) sizeDiffFm = "\x0314" + sizeDiff + "\x03";
+    else if (sizeDiff > 0) sizeDiffFm = "\x0303+" + sizeDiff + "\x03";
+    if (Math.abs(sizeDiff) >= 512) sizeDiffFm = "\x02" + sizeDiffFm + "\x02";
 
-        var date = new Date(rc.timestamp),
-            dateFm = [ numPadLeft(date.getUTCHours()), numPadLeft(date.getUTCMinutes()), numPadLeft(date.getUTCSeconds())].join(":"),
-            comment = (function(comment){
-                // MW link regex.
-                // TODO restructure with Q promises.
-            }(rc.comment));
+    var date = new Date(rc.timestamp),
+        dateFm = [ numPadLeft(date.getUTCHours()), numPadLeft(date.getUTCMinutes()), numPadLeft(date.getUTCSeconds())].join(":"),
 
-        statement = require("util").format(
-            "[\x1fRC\x1f] \x02\x0304%s\x03\x02%s \x02\x0310%s\x03 \x02by \x02\x0306%s\x03\x02 - %s (%s)%s (\x0305%s\x03)",
-            flags,
-            (rc.type == "log") ? " \x0304" + strCapitalize(rc.logaction) + "\x03" : "",
-            rc.title,
-            rc.user,
-            url,
-            sizeDiffFm,
-            (rc.comment) ? " (\x0314" + rc.comment.replace(/(?:\[|\]|\{|\})/g,"") +"\x03)" : "",
-            dateFm
-            );
-        global.irc.say(channel, statement);
-    });
+        // MediaWiki links
+        comment = rc.comment.replace(/\[\[(.+?)(?:|\|(.+?))\]\]/g, function(match, link, name){
+            if (link.substring(0,1) === "#") link = rc.title + link;
+            if (!name) name = link;
+            return util.format("\x02%s\x02 (%s)", name, rc.base_url + link);
+        });
+
+    statement = util.format(
+        "[\x1fRC\x1f] \x02\x0304%s\x03\x02%s \x02\x0310%s\x03 \x02by \x02\x0306%s\x03\x02 - %s (%s)%s (\x0305%s\x03)",
+        flags,
+        (rc.type == "log") ? " \x0304" + strCapitalize(rc.logaction) + "\x03" : "",
+        rc.title,
+        rc.user,
+        url,
+        sizeDiffFm,
+        comment,
+        dateFm
+        );
+    global.irc.say(channel, statement);
 }

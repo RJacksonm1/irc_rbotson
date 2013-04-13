@@ -2,8 +2,9 @@ var fs = require("fs"),
     util = require("util"),
     irc = require("irc");
 
-global.helpers = require("./helpers"),
+global.helpers = require("./helpers");
 global.config = require("./config");
+
 // Load config
 
 // Set up IRC
