@@ -7,7 +7,6 @@ config.plugins = {
     },
     steam_relay: {
         name: "steam_relay",
-        dependencies: ["steam", "fs"],
         relays: [{channel: "#somechannel", groupid: "103582791429521412"}],
         steam_name: "IRC Relay",
         steam_user: "user",
@@ -15,7 +14,6 @@ config.plugins = {
     },
     irc_log: {
         name: "irc_log",
-        dependencies: ["nano", "socket.io"],
         channels: ["#somechannel"],
         db_name: "rbotson_irc_log",
         db_server: "http://localhost:5984",
@@ -26,7 +24,6 @@ config.plugins = {
     },
     recent_changes: {
         name: "recent_changes",
-        dependencies: ["http", "querystring"],
         wikis: [
             {
                 enabled: true,

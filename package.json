@@ -9,14 +9,9 @@
     "nano": "*",
     "querystring": "*",
     "irc": "*",
-    "express": "*",
     "googleapis": "*",
-    "jade": "*",
     "socket.io": "*",
-    "validator": "*",
-    "socket.io-client": "*",
     "q": "*",
-    "steam": "https://github.com/RJacksonm1/node-steam/tarball/master",
-    "node-tokenizer": "https://github.com/RJacksonm1/node-tokenizer/tarball/master"
+    "steam": "https://github.com/RJacksonm1/node-steam/tarball/master"
   }
 }
