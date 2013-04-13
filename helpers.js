@@ -1,20 +1,21 @@
 var googleapis = require("googleapis");
 
-exports.shortenUrl = function shortenUrl(url, cb) {
-    googleapis.load('urlshortener', 'v1', function(err, client) {
-        client.withApiKey(global.config.google_api_key);
-        client.urlshortener.url
-            .insert(null, {longUrl: url})
-            .execute(function (err, result){
-                if (!err) {
-                    cb(result.id);
-                }
-                else {
-                    cb(url);
-                }
-            });
-    });
-};
+    exports.shortenUrl = function shortenUrl(url, cb) {
+        googleapis.discover('urlshortener', 'v1')
+            .execute(function(err, client) {
+                client.urlshortener.url
+                    .insert(null, {longUrl: url})
+                    .withApiKey(global.config.google_api_key)
+                    .execute(function (err, result){
+                        if (!err) {
+                            cb(result.id);
+                        }
+                        else {
+                            cb(url);
+                        }
+                });
+        });
+    };
 
 exports.strCapitalize = function strCapitalize(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
