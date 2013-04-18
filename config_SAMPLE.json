@@ -2,7 +2,7 @@
     "plugins": {
         "utility_commands": {
             "name": "utility_commands",
-            "authed_users": ["RJackson"] // Nickserv ids.
+            "authed_users": ["RJackson"]
         },
         "steam_relay": {
             "name": "steam_relay",
@@ -12,7 +12,10 @@
             }],
             "steam_name": "IRC Relay",
             "steam_user": "user",
-            "steam_pass": "password"
+            "steam_pass": "password",
+            "auth_code": "",
+            "servers_file": "servers",
+            "sentry_file": "sentry"
         },
         "irc_log": {
             "name": "irc_log",
@@ -21,8 +24,6 @@
             "db_server": "http://localhost:5984",
             "db_user": "",
             "db_pass": "",
-            "live_socket_enable": true,  // To send live updates to webfront.
-            "live_socket_port": 2999  // To send live updates to webfront.
         },
         "recent_changes": {
             "name": "recent_changes",
@@ -50,8 +51,8 @@
     },
 
     "google_api_key": "",
-    "irc_server": "irc.freenode.com",
-    "irc_nickname": "RBotson",
+    "irc_server": "irc.internet.com",
+    "irc_nickname": "Bestbot",
     "irc_nickserv_pw": null,
 
     "irc_options": {
