@@ -20,6 +20,10 @@ var reloadConfig = function reloadConfig(oldConfig) {
     },
 
     checkRecentChanges = function checkRecentChanges(wiki_config) {
+        if (wiki_config.params.rcstart === null) {
+            wiki_config.params.rcstart = parseInt(new Date().getTime()/1000, 10);
+        }
+
         getRCFromMediaWiki(wiki_config.api_url, wiki_config.params, function(rcs){
             if (rcs.length) {
                 for (var i = 0; i < rcs.length; i++) {
