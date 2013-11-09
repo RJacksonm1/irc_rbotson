@@ -6,15 +6,16 @@ var config = global.config.plugins.steam_relay,
     groupidsToChannels = {},
     channelsToGroupids = {},
     sentry,
-    bot;
+    bot,
+    _cwd = __dirname + "/../";
 
 module.exports = function (cb) {
-    if (fs.existsSync('servers')) {
+    if (fs.existsSync(_cwd + 'servers')) {
         steam.servers = JSON.parse(fs.readFileSync('servers'));
     }
 
     bot = new steam.SteamClient()
-        .logOn(config.steam_user, config.steam_pass, fs.readFileSync('sentry'))
+        .logOn(config.steam_user, config.steam_pass, fs.readFileSync(_cwd + 'sentry'))
         .on("loggedOn", function onSteamLogOn(){
             bot.setPersonaState(steam.EPersonaState.Online) // to display your bot's status as "Online"
                 .setPersonaName(config.steam_name); // to change its nickname
@@ -74,10 +75,10 @@ module.exports = function (cb) {
             }
         })
         .on('sentry', function onSteamSentry(sentry) {
-            require('fs').writeFileSync('sentry', sentry);
+            require('fs').writeFileSync(_cwd + 'sentry', sentry);
         })
         .on('servers', function onSteamServers(servers) {
-            fs.writeFile('servers', JSON.stringify(servers));
+            fs.writeFile(_cwd + 'servers', JSON.stringify(servers));
         })
         .on('error', function (err){
             util.log("steam_relay.js - Steam caught an error event =( " + err);
