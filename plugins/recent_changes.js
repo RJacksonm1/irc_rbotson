@@ -103,11 +103,13 @@ function rcToIRC(rc, channel) {
         dateFm = [ numPadLeft(date.getUTCHours()), numPadLeft(date.getUTCMinutes()), numPadLeft(date.getUTCSeconds())].join(":"),
 
         // MediaWiki links
-        comment = rc.comment.replace(/\[\[(.+?)(?:|\|(.+?))\]\]/g, function(match, link, name){
+        _comment = rc.comment.replace(/\[\[(.+?)(?:|\|(.+?))\]\]/g, function(match, link, name){
             if (link.substring(0,1) === "#") link = rc.title + link;
             if (!name) name = link;
             return util.format("\x02%s\x02 (%s)", name, rc.base_url + link);
         });
+
+        comment = _comment.replace('\n', ' ');
 
     statement = util.format(
         "[\x1fRC\x1f] \x02\x0304%s\x03\x02%s \x02\x0310%s\x03 \x02by \x02\x0306%s\x03\x02 - %s (%s)%s (\x0305%s\x03)",
