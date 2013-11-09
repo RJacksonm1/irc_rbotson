@@ -4,6 +4,7 @@ var config = global.config.plugins.recent_changes,
     strCapitalize = global.helpers.strCapitalize,
     strCapitalize = global.helpers.strCapitalize,
     numPadLeft = global.helpers.numPadLeft,
+    filterWikitext = global.helpers.filterWikitext,
     http = require("http"),
     querystring = require("querystring");
 
@@ -82,7 +83,7 @@ function rcToIRC(rc, channel) {
     util.log("recent_changes.js - Sending RC to IRC.");
 
     var url = "";
-    if (rc.type === "log") url = rc.base_url + "?title=" + rc.title.replace(" ", "_");
+    if (rc.type === "log") url = rc.base_url + "" + rc.title.replace(/ /g, "_");
     else url = rc.base_url + "?diff=" + rc.revid;
 
     var flags = "";
@@ -100,27 +101,20 @@ function rcToIRC(rc, channel) {
     if (Math.abs(sizeDiff) >= 512) sizeDiffFm = "\x02" + sizeDiffFm + "\x02";
 
     var date = new Date(rc.timestamp),
-        dateFm = [ numPadLeft(date.getUTCHours()), numPadLeft(date.getUTCMinutes()), numPadLeft(date.getUTCSeconds())].join(":"),
+        dateFm = [ numPadLeft(date.getUTCHours()), numPadLeft(date.getUTCMinutes()), numPadLeft(date.getUTCSeconds())].join(":");
 
-        // MediaWiki links
-        _comment = rc.comment.replace(/\[\[(.+?)(?:|\|(.+?))\]\]/g, function(match, link, name){
-            if (link.substring(0,1) === "#") link = rc.title + link;
-            if (!name) name = link;
-            return util.format("\x02%s\x02 (%s)", name, rc.base_url + link);
-        });
-
-        comment = _comment.replace('\n', ' ');
-
-    statement = util.format(
-        "[\x1fRC\x1f] \x02\x0304%s\x03\x02%s \x02\x0310%s\x03 \x02by \x02\x0306%s\x03\x02 - %s (%s)%s (\x0305%s\x03)",
-        flags,
-        (rc.type == "log") ? " \x0304" + strCapitalize(rc.logaction) + "\x03" : "",
-        rc.title,
-        rc.user,
-        url,
-        sizeDiffFm,
-        comment,
-        dateFm
-        );
-    global.irc.say(channel, statement);
+    filterWikitext(rc, true, function(cleanComment){
+        statement = util.format(
+            "[\x1fRC\x1f] \x02\x0304%s\x03\x02%s \x02\x0310%s\x03 \x02by \x02\x0306%s\x03\x02 - %s (%s)%s (\x0305%s\x03)",
+            flags,
+            (rc.type == "log") ? " \x0304" + strCapitalize(rc.logaction) + "\x03" : "",
+            rc.title,
+            rc.user,
+            url,
+            sizeDiffFm,
+            cleanComment ? " (\x0314" + cleanComment + "\x03)" : "",
+            dateFm
+            );
+        global.irc.say(channel, statement);
+    });
 }
