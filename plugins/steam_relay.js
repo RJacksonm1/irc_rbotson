@@ -11,7 +11,7 @@ var config = global.config.plugins.steam_relay,
 
 module.exports = function (cb) {
     if (fs.existsSync(_cwd + 'servers')) {
-        steam.servers = JSON.parse(fs.readFileSync('servers'));
+        steam.servers = JSON.parse(fs.readFileSync(_cwd + 'servers'));
     }
 
     bot = new steam.SteamClient()
