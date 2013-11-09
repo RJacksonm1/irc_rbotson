@@ -82,7 +82,7 @@ function rcToIRC(rc, channel) {
     util.log("recent_changes.js - Sending RC to IRC.");
 
     var url = "";
-    if (rc.type === "log") url = rc.base_url + "?title=" + rc.title.replace("_", " ");
+    if (rc.type === "log") url = rc.base_url + "?title=" + rc.title.replace(" ", "_");
     else url = rc.base_url + "?diff=" + rc.revid;
 
     var flags = "";
